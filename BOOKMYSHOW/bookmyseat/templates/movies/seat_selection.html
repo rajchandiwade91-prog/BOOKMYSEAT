@@ -1,0 +1,199 @@
+{% extends "users/basic.html" %}
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Montserrat', 'Noto Color Emoji', sans-serif;
+    background: linear-gradient(135deg, #ffdde1, #ee9ca7); /* lively gradient */
+    color: #2c3e50;
+  }
+
+  .premium-card {
+    background: rgba(255, 255, 255, 0.85); /* glassmorphism */
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .premium-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+  }
+
+  .seat-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 45px);
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .seat {
+    width: 45px;
+    height: 45px;
+    border: 2px solid #27ae60;
+    text-align: center;
+    line-height: 45px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    font-family: 'Noto Color Emoji', 'Montserrat', sans-serif;
+  }
+  .seat:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .seat.selected {
+    background: linear-gradient(135deg,#27ae60,#2ecc71);
+    color: #fff;
+    border: none;
+  }
+  .seat.sold {
+    background: #bdc3c7;
+    color: #fff;
+    cursor: not-allowed;
+    border: none;
+  }
+
+  .screen {
+    margin: 20px auto;
+    background: linear-gradient(90deg,#36D1DC,#5B86E5);
+    height: 60px;
+    text-align: center;
+    line-height: 60px;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: inset 0 -4px 8px rgba(0,0,0,0.2);
+    font-family: 'Noto Color Emoji', 'Montserrat', sans-serif;
+  }
+
+  .btn-premium {
+    border-radius: 30px;
+    padding: 12px 30px;
+    font-weight: 600;
+    font-family: 'Noto Color Emoji', 'Montserrat', sans-serif;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+  }
+  .btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  }
+
+  .btn-gradient {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 32px;
+    font-weight: 600;
+    transition: background 0.3s ease;
+  }
+  .btn-gradient:hover {
+    background: linear-gradient(135deg, #fad0c4, #ff9a9e);
+  }
+</style>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <!-- Movie and Theater Info -->
+      <div class="card premium-card mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+              <h4 class="card-title fw-bold">{{ theater.movie.name }}</h4>
+              <p class="card-text text-muted">
+                {{ theater.name }} | {{ theater.time }}
+              </p>
+              <p class="card-text"><strong>Ticket Price:</strong> ₹{{ theater.ticket_price }}</p>
+            </div>
+            <div class="mt-2 mt-sm-0">
+              <button class="btn btn-outline-primary me-2 mb-2 mb-sm-0 rounded-pill">2D</button>
+              <button class="btn btn-outline-primary me-2 mb-2 mb-sm-0 rounded-pill">3D</button>
+              <button class="btn btn-outline-primary mb-2 mb-sm-0 rounded-pill">IMAX 3D</button>
+              <button class="btn btn-outline-primary mb-2 mb-sm-0 rounded-pill">
+                {{ seats|length }} Seats
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seat Selection -->
+      <div class="card premium-card">
+        <div class="card-body">
+          <h5 class="card-title text-center mb-4 fw-bold">🎟️ Select Your Seats</h5>
+          <div class="screen">🎬 All eyes this way please!</div>
+
+          <form method="POST">
+            {% csrf_token %}
+            <div class="seat-grid mb-4">
+              {% for seat in seats %}
+              <div class="seat {% if seat.is_booked or seat.is_reserved %}sold{% endif %}" data-seat-id="{{ seat.id }}">
+                {% if not seat.is_booked and not seat.is_reserved %}
+                  <input type="checkbox" name="seats" value="{{ seat.id }}" class="d-none" id="seat-{{ seat.id }}">
+                  <label for="seat-{{ seat.id }}" class="w-100 h-100 d-flex align-items-center justify-content-center">
+                    {{ seat.seat_number }}
+                  </label>
+                {% else %}
+                  {{ seat.seat_number }}
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+
+            <!-- Seat Legend -->
+            <div class="d-flex justify-content-center mb-4">
+              <div class="d-flex align-items-center me-4">
+                <div class="seat"></div>
+                <span class="ms-2">Available</span>
+              </div>
+              <div class="d-flex align-items-center me-4">
+                <div class="seat selected"></div>
+                <span class="ms-2">Selected</span>
+              </div>
+              <div class="d-flex align-items-center">
+                <div class="seat sold"></div>
+                <span class="ms-2">Sold/Reserved</span>
+              </div>
+            </div>
+
+            <!-- Book Button -->
+            <div class="text-center">
+              <button type="submit" class="btn btn-gradient btn-lg btn-premium">
+                🎫 Book Selected Seats
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const seats = document.querySelectorAll(".seat");
+
+    seats.forEach(seat => {
+      seat.addEventListener("click", function() {
+        if (seat.classList.contains("sold")) return;
+
+        const checkbox = seat.querySelector("input[type='checkbox']");
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          seat.classList.toggle("selected", checkbox.checked);
+        }
+      });
+    });
+  });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% endblock %}
