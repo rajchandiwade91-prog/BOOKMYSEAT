@@ -1,0 +1,133 @@
+{% extends "users/basic.html" %}
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: pink;
+    color: #333;
+  }
+  .card {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 15px;
+  }
+  h2 {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 30px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  table th, table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+  }
+  table th {
+    background-color: #f2f2f2;
+  }
+</style>
+
+<div class="container py-4">
+  <h2>Admin Dashboard</h2>
+
+  <!-- Total Revenue -->
+  <div class="card text-center">
+    <h4>Total Revenue</h4>
+    <p id="revenueCounter" style="font-size:2rem; color:#000;">₹{{ total_revenue|floatformat:2 }}</p>
+    <small>All-time Ticket Sales</small>
+  </div>
+
+  <!-- Popular Movies Table -->
+  <div class="card">
+    <h5>Popular Movies</h5>
+    <table>
+      <thead>
+        <tr><th>Movie</th><th>Bookings</th></tr>
+      </thead>
+      <tbody>
+        {% for movie in popular_movies %}
+        <tr><td>{{ movie.name }}</td><td>{{ movie.bookings_count }}</td></tr>
+        {% empty %}
+        <tr><td colspan="2">No bookings yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Busiest Theaters Table -->
+  <div class="card mt-3">
+    <h5>Busiest Theaters</h5>
+    <table>
+      <thead>
+        <tr><th>Theater</th><th>Bookings</th></tr>
+      </thead>
+      <tbody>
+        {% for theater in busy_theaters %}
+        <tr><td>{{ theater.name }}</td><td>{{ theater.bookings_count }}</td></tr>
+        {% empty %}
+        <tr><td colspan="2">No bookings yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Charts Section (shifted below tables, full width) -->
+  <div class="card mt-4">
+    <h5>Most Popular Movies Chart</h5>
+    <canvas id="moviesChart" height="200"></canvas>
+  </div>
+
+  <div class="card mt-4">
+    <h5>Busiest Theaters Chart</h5>
+    <canvas id="theatersChart" height="200"></canvas>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script id="movie-labels" type="application/json">{{ movie_labels|safe }}</script>
+<script id="movie-data" type="application/json">{{ movie_data|safe }}</script>
+<script id="theater-labels" type="application/json">{{ theater_labels|safe }}</script>
+<script id="theater-data" type="application/json">{{ theater_data|safe }}</script>
+
+<script>
+  const movieLabels = JSON.parse(document.getElementById('movie-labels').textContent);
+  const movieData = JSON.parse(document.getElementById('movie-data').textContent);
+  const theaterLabels = JSON.parse(document.getElementById('theater-labels').textContent);
+  const theaterData = JSON.parse(document.getElementById('theater-data').textContent);
+
+  // Movies Chart (basic pink bars)
+  new Chart(document.getElementById('moviesChart'), {
+    type: 'bar',
+    data: { 
+      labels: movieLabels, 
+      datasets: [{ 
+        label: 'Bookings', 
+        data: movieData, 
+        backgroundColor: '#ff69b4' 
+      }] 
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+
+  // Theaters Chart (basic pink shades pie)
+  new Chart(document.getElementById('theatersChart'), {
+    type: 'pie',
+    data: { 
+      labels: theaterLabels, 
+      datasets: [{ 
+        data: theaterData, 
+        backgroundColor: ['#ff69b4','#ffc0cb','#ffb6c1','#db7093'] 
+      }] 
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+</script>
+{% endblock %}
