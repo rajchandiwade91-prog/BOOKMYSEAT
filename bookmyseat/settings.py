@@ -68,7 +68,8 @@ LOGIN_URL = '/login/'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "bookmyseat" / "bookmyseat" / "templates"],
+        # ✅ Corrected template path
+        'DIRS': [BASE_DIR / "bookmyseat" / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -107,8 +108,9 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_DIRS = [BASE_DIR / "bookmyseat" / "staticfiles"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+# ✅ Use this for your own CSS/JS/images
+STATICFILES_DIRS = [BASE_DIR / "bookmyseat" / "static"]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -120,6 +122,6 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 CSRF_TRUSTED_ORIGINS = [
     "https://*.onrender.com",
     "https://*.vercel.app",
-    "https://*.railway.app",   # ✅ allow Railway wildcard
-    "https://web-production-0973c.up.railway.app",  # ✅ your exact Railway domain
+    "https://*.railway.app",
+    "https://web-production-0973c.up.railway.app",
 ]
