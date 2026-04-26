@@ -22,6 +22,8 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "bookmyseat-3wse.onrender.com",
     ".vercel.app",
+    ".railway.app",   # ✅ allow Railway wildcard
+    "web-production-0973c.up.railway.app",  # ✅ your exact Railway domain
 ]
 
 # Application definition
@@ -81,7 +83,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'bookmyseat.wsgi.application'
 
-# Database (PostgreSQL on Render, SQLite locally)
+# Database (PostgreSQL on Railway, SQLite locally)
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR}/db.sqlite3",
@@ -118,4 +120,6 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 CSRF_TRUSTED_ORIGINS = [
     "https://*.onrender.com",
     "https://*.vercel.app",
+    "https://*.railway.app",   # ✅ allow Railway wildcard
+    "https://web-production-0973c.up.railway.app",  # ✅ your exact Railway domain
 ]
